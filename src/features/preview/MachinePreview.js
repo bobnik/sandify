@@ -5,7 +5,7 @@ import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
 import Downloader from '../exporter/Downloader'
 import { getCurrentLayer } from '../layers/selectors'
-import { getLayers, getPreview } from '../store/selectors'
+import { getPreview } from '../store/selectors'
 import { updateLayer } from '../layers/layersSlice'
 import { updatePreview } from './previewSlice'
 import { getVerticesStats } from '../machine/selectors'
@@ -14,11 +14,9 @@ import './MachinePreview.scss'
 const mapStateToProps = (state, ownProps) => {
   const preview = getPreview(state)
   const current = getCurrentLayer(state)
-  const layers = getLayers(state)
 
   return {
     currentLayer: current,
-    currentLayerSelected: layers.selected === current.id,
     sliderValue: preview.sliderValue,
     verticesStats: getVerticesStats(state),
   }

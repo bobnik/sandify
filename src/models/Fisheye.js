@@ -2,6 +2,7 @@ import Victor from 'victor'
 import Effect from './Effect'
 import { shapeOptions } from './Shape'
 import { circle } from '../common/geometry'
+import { subsample } from '../common/geometry'
 import * as d3Fisheye from 'd3-fisheye'
 
 const options = {
@@ -42,10 +43,11 @@ export default class Fisheye extends Effect {
   }
 
   applyEffect(effect, layer, vertices) {
+    vertices = subsample(vertices, 2.0)
     const fisheye = d3Fisheye.radial()
       .radius(effect.startingWidth/2)
       .distortion(effect.fisheyeDistortion/2)
-    fisheye.focus([effect.offsetX, effect.offsetY])
+    fisheye.focus([layer.offsetX + effect.offsetX, layer.offsetY + effect.offsetY]);
 
     return vertices.map(vertex => {
       const warped = fisheye([vertex.x, vertex.y])

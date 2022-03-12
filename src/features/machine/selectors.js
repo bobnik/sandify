@@ -64,6 +64,7 @@ const makeGetLayerVertices = layerId => {
         machine: machine,
         fonts: fonts
       }
+
       log('makeGetLayerVertices', layerId)
       const metashape = getShape(layer)
 

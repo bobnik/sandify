@@ -60,6 +60,7 @@ export const getNumLayers = createSelector(
 export const getKonvaLayerIds = createSelector(
   [ getCurrentLayer, getVisibleLayerIds ],
   (currentLayer, visibleLayerIds) => {
+      log("getKonvaLayerIds")
       const kIds = visibleLayerIds.filter(id => id !== currentLayer.id)
       if (currentLayer.visible) {
         kIds.push(currentLayer.id)
@@ -76,7 +77,7 @@ export const isDragging = createSelector(
   }
 )
 
-export const getNumVisibleLayers = createSelector(
+export const getNumVisibleLayers = createDeepEqualSelector(
   getVisibleNonEffectIds,
   (layers) => {
     return layers.length
@@ -88,6 +89,35 @@ export const makeGetLayerIndex = layerId => {
     getVisibleLayerIds,
     (visibleLayerIds) => {
       return visibleLayerIds.findIndex(id => id === layerId)
+    }
+  )
+}
+
+// if a layer is an non-effect layer, returns that layer. Else returns the root layer
+// affected by the effect
+export const makeGetRootLayer = layerId => {
+  return createSelector(
+    [
+      getLayerIds,
+      getLayersById
+    ],
+    (layerIds, layers) => {
+      const layer = layers[layerId]
+
+      if (layer.effect) {
+        // find first non-effect previous layer if it exists
+        let idx = layerIds.findIndex(id => id === layerId)
+
+        while (idx >= 0) {
+          const prev = layers[layerIds[idx]]
+          if (!prev.effect) {
+            return prev
+          }
+          idx -= 1
+        }
+      }
+
+      return layer
     }
   )
 }
@@ -105,6 +135,7 @@ export const makeGetLayer = layerId => {
   return createSelector(
     getLayersById,
     (layers) => {
+      log("makeGetLayer", layerId)
       return layers[layerId]
     }
   )
@@ -120,6 +151,8 @@ export const makeGetEffects = layerId => {
     ],
     memoizeArrayProducingFn(
       (layers, visibleLayerIds) => {
+        log("makeGetEffects", layerId)
+
         let index = visibleLayerIds.findIndex(id => id === layerId)
         const layer = layers[layerId]
 

@@ -5,7 +5,7 @@ import isEqual from 'lodash'
 // https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
 const cachedSelectors = {}
 
-// ensures we only create a single selector for a given layer
+// ensures we only create a single selector for the given layers
 export const getCachedSelector = (fn, ...layerIds) => {
   const key = layerIds.join('-')
 

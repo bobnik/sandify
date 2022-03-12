@@ -32,6 +32,7 @@ export const getFont = (name) => {
   return globalFonts[name]
 }
 
+let loadCount = 0
 export const fontsSlice = createSlice({
   name: 'fonts',
   initialState: {
@@ -41,8 +42,8 @@ export const fontsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(loadFont.fulfilled, (state, action) => {
-      state.loaded = state.fonts.length === Object.keys(supportedFonts).length - 1
-      state.fonts.push(action.payload)
+      loadCount++
+      state.loaded = loadCount === Object.keys(supportedFonts).length - 1
     })
   }
 })

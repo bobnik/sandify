@@ -5,7 +5,7 @@ import { makeGetPreviewTrackVertices, makeGetPreviewVertices, getSliderColors,
   getVertexOffsets, getAllComputedVertices, getSliderBounds } from '../machine/selectors'
 import { updateLayer } from '../layers/layersSlice'
 import { getLayers, getPreview } from '../store/selectors'
-import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, getNumVisibleLayers } from '../layers/selectors'
+import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, makeGetRootLayer, getNumVisibleLayers } from '../layers/selectors'
 import { getCachedSelector } from '../store/selectors'
 import { roundP } from '../../common/util'
 import PreviewHelper from './PreviewHelper'
@@ -22,12 +22,14 @@ const PreviewLayer = (ownProps) => {
     // It's quite likely there is a more elegant/proper way around this.
     const layers = getLayers(state)
     const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayer(state)
+    const rootLayer = getCachedSelector(makeGetRootLayer, ownProps.id)(state)
     const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
     const preview = getPreview(state)
 
     return {
       layer: layer,
+      rootLayer: rootLayer,
       start: index === 0,
       end: index === numLayers - 1,
       currentLayer: getCurrentLayer(state),
@@ -41,7 +43,9 @@ const PreviewLayer = (ownProps) => {
       offsets: getVertexOffsets(state),
       offsetId: layer.id,
       bounds: getSliderBounds(state),
-      markCoordinates: false // debug feature: set to true to see coordinates while drawing
+      markCoordinates: false, // debug feature: set to true to see coordinates while drawing
+      rootOffsetX: layer.effect ? rootLayer.offsetX  : 0,
+      rootOffsetY: layer.effect ? -rootLayer.offsetY : 0
     }
   }
 
@@ -178,8 +182,8 @@ const PreviewLayer = (ownProps) => {
         height={konvaSizeY}
         offsetY={konvaSizeY/2}
         offsetX={konvaSizeX/2}
-        x={props.layer.offsetX || 0}
-        y={-props.layer.offsetY || 0}
+        x={props.layer.offsetX + props.rootOffsetX || 0}
+        y={-props.layer.offsetY + props.rootOffsetY || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
@@ -194,8 +198,8 @@ const PreviewLayer = (ownProps) => {
         onDragEnd={e => {
           onChange({
             dragging: false,
-            offsetX: roundP(e.target.x(), 0),
-            offsetY: roundP(-e.target.y(), 0)
+            offsetX: roundP(e.target.x(), 0) - props.rootOffsetX,
+            offsetY: roundP(-e.target.y(), 0) + props.rootOffsetY
           })
         }}
         onTransformStart={e => {
