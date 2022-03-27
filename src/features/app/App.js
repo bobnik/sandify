@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { Provider } from 'react-redux'
+import ReactTooltip from 'react-tooltip'
 import Header from './Header'
 import InputTabs from './InputTabs'
 import MachinePreview from '../preview/MachinePreview'
@@ -11,6 +12,7 @@ class App extends Component {
   render() {
     return (
       <Provider store={store}>
+        <ReactTooltip effect="solid" place="bottom" backgroundColor="#666666" />
         <div className="App">
           <Header />
 

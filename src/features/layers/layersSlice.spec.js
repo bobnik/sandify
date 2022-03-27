@@ -17,6 +17,7 @@ import layers, {
   updateLayer,
   toggleSpin,
   toggleGrow,
+  toggleOpen,
   toggleRepeat,
   toggleTrack,
   toggleTrackGrow,
@@ -46,6 +47,7 @@ describe('layers reducer', () => {
     startingHeight: 10,
     offsetX: 0.0,
     offsetY: 0.0,
+    open: true,
     rotation: 0,
     numLoops: 10,
     reverse: false,
@@ -676,7 +678,7 @@ describe('layers reducer', () => {
     })
   })
 
-  it('should handle toggleToggleVisible', () => {
+  it('should handle toggleVisible', () => {
     expect(
       layers(
         {
@@ -692,6 +694,27 @@ describe('layers reducer', () => {
       byId: {
         '1': {
           visible: false
+        }
+      }
+    })
+  })
+
+  it('should handle toggleOpen', () => {
+    expect(
+      layers(
+        {
+          byId: {
+            '1': {
+              open: true
+            }
+          }
+        },
+        toggleOpen({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          open: false
         }
       }
     })

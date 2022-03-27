@@ -21,10 +21,10 @@ function createLayer(state, attrs) {
   return layer
 }
 
-function deleteLayer(state, id) {
-  const idx = state.allIds.findIndex(id => id === id)
+function deleteLayer(state, deleteId) {
+  const idx = state.allIds.findIndex(id => id === deleteId)
   state.allIds.splice(idx, 1)
-  delete state.byId[id]
+  delete state.byId[deleteId]
   return idx
 }
 
@@ -121,7 +121,7 @@ const layersSlice = createSlice({
     },
     addEffect(state, action) {
       const parent = state.byId[action.payload.parentId]
-      if (parent == undefined) return
+      if (parent === undefined) return
 
       const effect = createEffect(state, parent, action.payload)
       setCurrentId(state, effect.id)
@@ -198,28 +198,32 @@ const layersSlice = createSlice({
       Object.assign(state, action.payload)
     },
     toggleRepeat(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].repeatEnabled = !state.byId[transform.id].repeatEnabled
+      const layer = action.payload
+      state.byId[layer.id].repeatEnabled = !state.byId[layer.id].repeatEnabled
     },
     toggleGrow(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].growEnabled = !state.byId[transform.id].growEnabled
+      const layer = action.payload
+      state.byId[layer.id].growEnabled = !state.byId[layer.id].growEnabled
     },
     toggleSpin(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].spinEnabled = !state.byId[transform.id].spinEnabled
+      const layer = action.payload
+      state.byId[layer.id].spinEnabled = !state.byId[layer.id].spinEnabled
     },
     toggleTrack(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].trackEnabled = !state.byId[transform.id].trackEnabled
+      const layer = action.payload
+      state.byId[layer.id].trackEnabled = !state.byId[layer.id].trackEnabled
     },
     toggleTrackGrow(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].trackGrowEnabled = !state.byId[transform.id].trackGrowEnabled
+      const layer = action.payload
+      state.byId[layer.id].trackGrowEnabled = !state.byId[layer.id].trackGrowEnabled
+    },
+    toggleOpen(state, action) {
+      const layer = action.payload
+      state.byId[layer.id].open = !state.byId[layer.id].open
     },
     toggleVisible(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].visible = !state.byId[transform.id].visible
+      const layer = action.payload
+      state.byId[layer.id].visible = !state.byId[layer.id].visible
     },
   }
 })
@@ -244,7 +248,8 @@ export const {
   toggleGrow,
   toggleTrack,
   toggleTrackGrow,
-  toggleVisible
+  toggleVisible,
+  toggleOpen
 } = layersSlice.actions
 
 export default layersSlice.reducer

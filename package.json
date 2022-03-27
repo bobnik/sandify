@@ -35,6 +35,7 @@
     "react-select": "^4.3.0",
     "react-sortable-hoc": "^2.0",
     "react-switch": "^6.0.0",
+    "react-tooltip": "^4.2.21",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.1.0",
     "reselect": "^4.0.0",
@@ -77,5 +78,10 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "jest": {
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/points-on-path/src"
+    ]
+  }
 }
