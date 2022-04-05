@@ -13,6 +13,7 @@ import layers, {
   setCurrentLayer,
   setSelectedLayer,
   setNewLayerType,
+  setNewEffectType,
   setShapeType,
   updateLayer,
   toggleSpin,
@@ -87,6 +88,9 @@ describe('layers reducer', () => {
       newLayerType: 'polygon',
       newLayerName: 'polygon',
       newLayerNameOverride: false,
+      newEffectNameOverride: false,
+      newEffectName: 'mask',
+      newEffectType: 'mask',
       copyLayerName: null,
       byId: {},
       allIds: []
@@ -334,6 +338,7 @@ describe('layers reducer', () => {
           'layer': {
             id: 'layer',
             name: 'foo',
+            open: true,
             effectIds: ['layer-1']
           },
           'layer-1': {
@@ -731,6 +736,20 @@ describe('layers reducer', () => {
     ).toEqual({
       newLayerType: 'polygon',
       newLayerName: 'polygon'
+    })
+  })
+
+  it('should handle setNewEffectType', () => {
+    expect(
+      layers(
+        {
+          newEffectType: 'mask'
+        },
+        setNewEffectType('noise')
+      )
+    ).toEqual({
+      newEffectType: 'noise',
+      newEffectName: 'noise'
     })
   })
 })

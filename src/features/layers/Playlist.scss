@@ -1,10 +1,25 @@
 .layer-button {
-  color: #aaa;
+  color: rgb(136, 136, 136);
   font-size: 1.2rem;
 
-  .active.list-group-item & {
+  .layer-active & {
     color: white;
   }
+}
+
+.layer-effect-spacer {
+  padding-left: 1.1rem;
+  margin-left: 2.4rem;
+  align-self: stretch;
+  border-left: 1px solid rgba(0,0,0,.125);
+
+  .layer-active & {
+    border-left: 1px solid rgba(255, 255, 255, 0.6);
+  }
+}
+
+.layer-left {
+  width: 2.5rem;
 }
 
 .cursor-move {
@@ -14,5 +29,27 @@
 #playlist-group {
   .list-group-item {
     padding: 0.5rem 0.25rem;
+  }
+
+  .layer-effect {
+    padding: 0;
+    border: none;
+  }
+}
+
+.list-group-item.active {
+  color: inherit;
+  background-color: #fff;
+  border-color: inherit;
+}
+
+.layer-active {
+  color: #fff;
+  background-color: #007bff;
+}
+
+.layer-hidden {
+  .layer-effect {
+    opacity: 0.5;
   }
 }

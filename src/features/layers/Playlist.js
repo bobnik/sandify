@@ -1,29 +1,21 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-<<<<<<< HEAD
-import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
-import Select from 'react-select'
-import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa'
-=======
 import { Button } from 'react-bootstrap'
 import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
 import { MdLibraryAdd, MdOutlineFileUpload } from 'react-icons/md'
 
->>>>>>> 3c84fde... move playlist classes into their own files
-import { getLayers } from '../store/selectors'
-import { getAllLayersInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
-import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
+import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
+import { setCurrentLayer, addLayer, removeLayer, moveLayer, moveEffect, removeEffect, toggleVisible, toggleOpen } from '../layers/layersSlice'
 import { registeredShapes, getShape } from '../../models/shapes'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
 import ImportLayer from './ImportLayer'
-import SortableList from './SortableList'
+import NewEffect from './NewEffect'
+import SortableLayers from './SortableLayers'
 import './Playlist.scss'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
-  const layers = getLayers(state)
   const shape = getShape(layer)
   const numLayers = getNumLayers(state)
 
@@ -31,9 +23,7 @@ const mapStateToProps = (state, ownProps) => {
     layers: getAllLayersInfo(state),
     numLayers: numLayers,
     currentLayer: layer,
-    shape: shape,
-    newLayerType: layers.newLayerType,
-    newLayerNameOverride: layers.newLayerNameOverride
+    shape: shape
   }
 }
 
@@ -53,6 +43,21 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onLayerMoved: ({oldIndex, newIndex}) => {
       dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
     },
+    onEffectRemoved: (id) => {
+      dispatch(removeEffect(id))
+    },
+    onEffectMoved: ({nodes, oldIndex, newIndex}) => {
+      const parent = nodes[0].node.closest('.layer')
+
+      dispatch(moveEffect({
+        parentId: parent.id,
+        oldIndex: oldIndex,
+        newIndex: newIndex
+      }))
+    },
+    onSortStarted: ({node}) => {
+      dispatch(setCurrentLayer(node.id))
+    },
     onToggleLayerOpen: (id) => {
       dispatch(toggleOpen({ id: id }))
     },
@@ -63,13 +68,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-
 class Playlist extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       showNewLayer: false,
+      showNewEffect: false,
       showImportLayer: false,
       showCopyLayer: false
     }
@@ -82,8 +87,12 @@ class Playlist extends Component {
     el.scrollTop = el.scrollHeight
   }
 
-  toggleNewModal() {
+  toggleNewLayerModal() {
     this.setState({showNewLayer: !this.state.showNewLayer})
+  }
+
+  toggleNewEffectModal() {
+    this.setState({showNewEffect: !this.state.showNewEffect})
   }
 
   toggleImportModal() {
@@ -103,7 +112,7 @@ class Playlist extends Component {
 
   render() {
     const {
-      currentLayer, numLayers, onLayerMoved, onLayerRemoved
+      currentLayer, numLayers, onLayerMoved, onLayerRemoved, onSortStarted, onEffectRemoved
     } = this.props
     const canRemove = numLayers > 1
 
@@ -111,7 +120,12 @@ class Playlist extends Component {
       <div>
         <NewLayer
           showModal={this.state.showNewLayer}
-          toggleModal={this.toggleNewModal.bind(this)}
+          toggleModal={this.toggleNewLayerModal.bind(this)}
+        />
+
+        <NewEffect
+          showModal={this.state.showNewEffect}
+          toggleModal={this.toggleNewEffectModal.bind(this)}
         />
 
         <ImportLayer
@@ -126,24 +140,27 @@ class Playlist extends Component {
 
         <div className="p-3">
           <h2 className="panel">Layers ({numLayers})</h2>
-          <SortableList
+          <SortableLayers
             pressDelay={150}
             onSortEnd={onLayerMoved}
+            updateBeforeSortStart={onSortStarted}
+            lockAxis="y"
             {...this.props}
           />
-          <div className="d-flex align-items-center mx-1">
+          <div className="d-flex align-items-center border-left border-right border-bottom">
             <Button
-              className="mr-1 layer-button"
+              className="ml-2 layer-button"
               variant="link" size="sm"
               data-tip="Create new layer"
-              onClick={this.toggleNewModal.bind(this)}
+              onClick={this.toggleNewLayerModal.bind(this)}
             >
               <FaPlusSquare />
             </Button>
             <Button
               className="layer-button"
               variant="link"
-              data-tip="Create new mask"
+              data-tip="Create new effect"
+              onClick={this.toggleNewEffectModal.bind(this)}
             >
               <MdLibraryAdd />
             </Button>
@@ -164,11 +181,19 @@ class Playlist extends Component {
               >
                 <FaCopy />
               </Button>
-              {canRemove && <Button
-                className="layer-button"
+              {canRemove && !currentLayer.effect && <Button
+                className="mr-2 layer-button"
                 variant="link"
                 data-tip="Delete layer"
                 onClick={onLayerRemoved.bind(this, currentLayer.id)}
+              >
+                <FaTrash />
+              </Button>}
+              {currentLayer.effect && <Button
+                className="mr-2 layer-button"
+                variant="link"
+                data-tip="Delete effect"
+                onClick={onEffectRemoved.bind(this, currentLayer.id)}
               >
                 <FaTrash />
               </Button>}

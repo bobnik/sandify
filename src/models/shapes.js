@@ -68,7 +68,7 @@ export const getShapeDefaults = () => {
   })
 }
 
-export const getShapeSelectOptions = (includeEffects=true) => {
+export const getShapeSelectOptions = (effects = false) => {
   const groupOptions = []
   const shapes = getShapeDefaults()
 
@@ -86,7 +86,9 @@ export const getShapeSelectOptions = (includeEffects=true) => {
       if (shape.selectGroup === 'import') {
         // Users can't manually select this group.
         continue
-      } else if (shape.selectGroup === 'effects' && !includeEffects) {
+      } else if (shape.selectGroup === 'effects' && !effects) {
+        continue
+      } else if (shape.selectGroup !== 'effects' && effects) {
         continue
       }
       const newOptions = [ optionLabel ]

@@ -21,8 +21,8 @@ const mapStateToProps = (state, ownProps) => {
     layer: layer,
     shape: shape,
     options: shape.getOptions(),
-    selectOptions: getShapeSelectOptions(false),
-    showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
+    selectOptions: getShapeSelectOptions(layer.effect),
+    showShapeSelectRender: layer.selectGroup !== 'import',
     link: shape.link,
     linkText: shape.linkText
   }
@@ -47,16 +47,20 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class Layer extends Component {
   render() {
-    const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
-    const optionsRender = Object.keys(this.props.options).map((key, index) => {
+    const {
+      shape, options, linkText, link, showShapeSelectRender, onChangeType, selectOptions,
+      onRestoreDefaults, layer
+    } = this.props
+    const selectedOption = { value: shape.id, label: shape.name }
+    const optionsRender = Object.keys(options).map((key, index) => {
       return this.getOptionComponent(key, index)
     })
 
-    const linkText = this.props.linkText || this.props.link
-    const linkRender = this.props.link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p></Col></Row> : undefined
+    const linkLabel = linkText || link
+    const linkRender = link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={link}>{linkLabel}</a> for ideas.</p></Col></Row> : undefined
     let optionsListRender = undefined
 
-    if (Object.entries(this.props.options).length > 0) {
+    if (Object.entries(options).length > 0) {
       optionsListRender =
         <div className="m-0">
           {optionsRender}
@@ -65,7 +69,7 @@ class Layer extends Component {
 
     let shapeSelectRender = undefined
 
-    if (this.props.showShapeSelectRender) {
+    if (showShapeSelectRender) {
       shapeSelectRender =
         <Row className="align-items-center">
           <Col sm={5}>
@@ -75,9 +79,9 @@ class Layer extends Component {
           <Col sm={7}>
             <Select
               value={selectedOption}
-              onChange={this.props.onChangeType}
+              onChange={onChangeType}
               maxMenuHeight={305}
-              options={this.props.selectOptions} />
+              options={selectOptions} />
           </Col>
         </Row>
     }
@@ -89,7 +93,7 @@ class Layer extends Component {
             <h2 className="panel m-0">Properties</h2>
           </Col>
           <Col sm={7}>
-            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
+            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={onRestoreDefaults}>Restore defaults</Button>
           </Col>
         </Row>
 
@@ -99,53 +103,54 @@ class Layer extends Component {
 
         <div className="pt-1">
           { optionsListRender }
-          <Transforms id={this.props.layer.id} />
+          <Transforms id={layer.id} />
         </div>
       </Card>
     )
   }
 
   getOptionComponent(key, index) {
-    const option = this.props.options[key]
+    const { options, layer, onChange } = this.props
+    const option = options[key]
 
     if (option.type === 'dropdown') {
       return  <DropdownOption
-                onChange={this.props.onChange}
-                options={this.props.options}
+                onChange={onChange}
+                options={options}
                 optionKey={key}
                 key={key}
                 index={index}
-                model={this.props.layer} />
+                model={layer} />
     } else if (option.type === 'checkbox') {
       return  <CheckboxOption
-                onChange={this.props.onChange}
-                options={this.props.options}
+                onChange={onChange}
+                options={options}
                 optionKey={key}
                 key={key}
                 index={index}
-                model={this.props.layer} />
+                model={layer} />
     } else if (option.type === 'comments') {
       return  <CommentsBox
-                options={this.props.options}
+                options={options}
                 optionKey={key}
                 key={key}
-                comments={this.props.layer.comments} />
+                comments={layer.comments} />
     } else if (option.type === 'togglebutton') {
       return  <ToggleButtonOption
-                onChange={this.props.onChange}
-                options={this.props.options}
+                onChange={onChange}
+                options={options}
                 optionKey={key}
                 key={key}
                 index={index}
-                model={this.props.layer} />
+                model={layer} />
     } else {
       return  <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
+                onChange={onChange}
+                options={options}
                 optionKey={key}
                 key={key}
                 index={index}
-                model={this.props.layer} />
+                model={layer} />
     }
   }
 }

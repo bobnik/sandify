@@ -24,7 +24,7 @@ const mapStateToProps = (state, ownProps) => {
     newLayerType: layers.newLayerType,
     newLayerName: layers.newLayerName,
     currentLayer: layer,
-    selectOptions: getShapeSelectOptions(),
+    selectOptions: getShapeSelectOptions(false),
     showModal: ownProps.showModal
   }
 }

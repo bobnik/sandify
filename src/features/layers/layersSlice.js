@@ -9,14 +9,17 @@ const protectedAttrs = [
 ]
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
 const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
+const newEffectType = localStorage.getItem('currentEffect') || 'mask'
+const newEffectName = getShape({type: newEffectType}).name.toLowerCase()
 
 function createLayer(state, attrs) {
   const layer = {
     ...attrs,
-    id: uniqueId('layer-'),
+    id: (attrs.restore && attrs.id) || uniqueId('layer-'),
     name: attrs.name || state.newLayerName
   }
 
+  delete layer.restore
   state.byId[layer.id] = layer
   return layer
 }
@@ -28,17 +31,32 @@ function deleteLayer(state, deleteId) {
   return idx
 }
 
+function deleteEffect(state, deleteId) {
+  const layer = state.byId[deleteId]
+  const parent = state.byId[layer.parentId]
+
+  const idx = parent.effectIds.findIndex(id => id === deleteId)
+  parent.effectIds.splice(idx, 1)
+
+  delete state.byId[deleteId]
+  handleAfterDelete(state, deleteId, idx)
+}
+
 function createEffect(state, parent, attrs) {
-  const effect = createLayer(state, attrs)
+  const effect = createLayer(state, {
+    ...attrs,
+    name: attrs.name || state.newEffectName
+  })
 
   effect.parentId = parent.id
   parent.effectIds ||= []
   parent.effectIds.push(effect.id)
+  parent.effectIds = [...new Set(parent.effectIds)]
 
   return effect
 }
 
-function afterDelete(state, deletedId, deletedIdx) {
+function handleAfterDelete(state, deletedId, deletedIdx) {
   if (deletedId === state.current) {
     if (deletedIdx === state.allIds.length) {
       setCurrentId(state, state.allIds[deletedIdx-1])
@@ -49,7 +67,9 @@ function afterDelete(state, deletedId, deletedIdx) {
 }
 
 function currLayerIndex(state) {
-  return state.allIds.findIndex(id => id === state.current)
+  const currentLayer = state.byId[state.current]
+  const currId = currentLayer.effect ? currentLayer.parentId : currentLayer.id
+  return state.allIds.findIndex(id => id === currId)
 }
 
 // TODO: remove this function when you refactor to remove 'selected' feature; currently disabled
@@ -66,13 +86,16 @@ const layersSlice = createSlice({
     newLayerType: newLayerType,
     newLayerName: newLayerName,
     newLayerNameOverride: false,
+    newEffectType: newEffectType,
+    newEffectName: newEffectName,
+    newEffectNameOverride: false,
     copyLayerName: null,
     byId: {},
     allIds: []
   },
   reducers: {
     addLayer(state, action) {
-      const index = currLayerIndex(state) + 1
+      const index = state.current ? currLayerIndex(state) + 1 : 0
       const layer = createLayer(state, action.payload)
 
       state.allIds.splice(index, 0, layer.id)
@@ -80,8 +103,8 @@ const layersSlice = createSlice({
       state.newLayerNameOverride = false
       state.newLayerName = layer.name
 
-      if (layer.type !== 'file_import' && !layer.effect) {
-        localStorage.setItem('currentShape', layer.type)
+      if (layer.type !== 'file_import') {
+        localStorage.setItem(layer.effect ? 'currentEffect' : 'currentShape', layer.type)
       }
     },
     moveLayer(state, action) {
@@ -112,30 +135,23 @@ const layersSlice = createSlice({
 
       if (layer.effectIds) {
         layer.effectIds.forEach(effectId => {
-          deleteLayer(state, effectId)
+          deleteEffect(state, effectId)
         })
       }
 
       const idx = deleteLayer(state, id)
-      afterDelete(state, id, idx)
+      handleAfterDelete(state, id, idx)
     },
     addEffect(state, action) {
       const parent = state.byId[action.payload.parentId]
       if (parent === undefined) return
 
       const effect = createEffect(state, parent, action.payload)
+      parent.open = true
       setCurrentId(state, effect.id)
     },
     removeEffect(state, action) {
-      const deleteId = action.payload
-      const layer = state.byId[deleteId]
-      const parent = state.byId[layer.parentId]
-
-      const idx = parent.effectIds.findIndex(id => id === deleteId)
-      parent.effectIds.splice(idx, 1)
-
-      delete state.byId[deleteId]
-      afterDelete(state, deleteId, idx)
+      deleteEffect(state, action.payload)
     },
     moveEffect(state, action) {
       const { parentId, oldIndex, newIndex } = action.payload
@@ -190,6 +206,14 @@ const layersSlice = createSlice({
       }
       Object.assign(state, attrs)
     },
+    setNewEffectType(state, action) {
+      let attrs = { newEffectType: action.payload }
+      if (!state.newEffectNameOverride) {
+        const shape = getShape({type: action.payload})
+        attrs.newEffectName = shape.name.toLowerCase()
+      }
+      Object.assign(state, attrs)
+    },
     updateLayer(state, action) {
       const layer = action.payload
       state.byId[layer.id] = {...state.byId[layer.id], ...layer}
@@ -241,6 +265,7 @@ export const {
   setSelectedLayer,
   setShapeType,
   setNewLayerType,
+  setNewEffectType,
   updateLayer,
   updateLayers,
   toggleRepeat,
