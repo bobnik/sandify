@@ -40,10 +40,17 @@ export const getCurrentLayer = createSelector(
 )
 
 export const getAllLayersInfo = createSelector(
-  [ getLayerIds, getLayersById ],
-  (layerIds, layersById) => {
+  [ getLayersById, getLayerIds ],
+  (layersById, layerIds) => {
     log("getAllLayersInfo")
-    return layerIds.map(id => layersById[id])
+
+    return layerIds.map(layerId => {
+      const layer = { ...layersById[layerId] }
+      layer.effects = layer.effectIds && layer.effectIds.map(effectId => {
+        return layersById[effectId]
+      })
+      return layer
+    })
   }
 )
 
@@ -93,31 +100,14 @@ export const makeGetLayerIndex = layerId => {
   )
 }
 
-// if a layer is an non-effect layer, returns that layer. Else returns the root layer
-// affected by the effect
 export const makeGetRootLayer = layerId => {
   return createSelector(
     [
-      getLayerIds,
       getLayersById
     ],
-    (layerIds, layers) => {
+    (layers) => {
       const layer = layers[layerId]
-
-      if (layer.effect) {
-        // find first non-effect previous layer if it exists
-        let idx = layerIds.findIndex(id => id === layerId)
-
-        while (idx >= 0) {
-          const prev = layers[layerIds[idx]]
-          if (!prev.effect) {
-            return prev
-          }
-          idx -= 1
-        }
-      }
-
-      return layer
+      return (layer && layer.effect) ? layers[layer.parentId] : null
     }
   )
 }
@@ -152,26 +142,31 @@ export const makeGetEffects = layerId => {
     memoizeArrayProducingFn(
       (layers, visibleLayerIds) => {
         log("makeGetEffects", layerId)
-
-        let index = visibleLayerIds.findIndex(id => id === layerId)
         const layer = layers[layerId]
+        const effects = []
 
-        if (layer.effect || index === visibleLayerIds.length - 1) {
-          return []
-        } else {
-          index = index + 1
-          const effects = []
-          let id = visibleLayerIds[index]
-
-          while (id && layers[id].effect) {
-            effects.push(layers[id])
-            index = index + 1
-            id = visibleLayerIds[index]
-          }
-
-          return effects
+        if (layer.effectIds) {
+          layer.effectIds.forEach(effectId => {
+            const effect = layers[effectId]
+            if (effect && effect.visible) effects.push(effect)
+          })
         }
+
+        return effects
       }
     )
+  )
+}
+
+export const makeGetParentLayer = layerId => {
+  return createSelector(
+    [
+      getLayersById
+    ],
+    (layers) => {
+      log("makeGetParentLayer", layerId)
+      const layer = layers[layerId]
+      return layers[layer.parentId]
+    }
   )
 }

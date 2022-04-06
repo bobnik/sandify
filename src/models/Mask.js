@@ -71,24 +71,27 @@ export default class Mask extends Effect {
     const width = state.shape.startingWidth
     const height = state.shape.startingHeight
 
-    if (state.shape.dragging) {
-      if (state.shape.maskMachine === 'circle') {
-        return circle(width/2)
-      } else {
-        return [
-          new Victor(-width/2, height/2),
-          new Victor(width/2, height/2),
-          new Victor(width/2, -height/2),
-          new Victor(-width/2, -height/2),
-          new Victor(-width/2, height/2),
-        ]
-      }
+    if (state.shape.maskMachine === 'circle') {
+      return circle(width/2)
+    } else {
+      return [
+        new Victor(-width/2, height/2),
+        new Victor(width/2, height/2),
+        new Victor(width/2, -height/2),
+        new Victor(-width/2, -height/2),
+        new Victor(-width/2, height/2),
+      ]
     }
   }
 
-  applyEffect(effect, layer, vertices) {
+  applyEffect(effect, layer, vertices, options = {}) {
     vertices = vertices.map(vertex => {
-      return rotate(offset(vertex, -effect.offsetX - layer.offsetX, -effect.offsetY - layer.offsetY), effect.rotation)
+      return rotate(
+        offset(
+          vertex,
+          -effect.offsetX - layer.offsetX,
+          -effect.offsetY - layer.offsetY
+        ), effect.rotation + layer.rotation)
     })
 
     if (!effect.dragging) {
@@ -104,7 +107,11 @@ export default class Mask extends Effect {
     }
 
     return vertices.map(vertex => {
-      return offset(rotate(vertex, -effect.rotation), effect.offsetX + layer.offsetX, effect.offsetY + layer.offsetY)
+      return offset(
+        rotate(vertex, -effect.rotation - layer.rotation),
+        effect.offsetX + layer.offsetX,
+        effect.offsetY + layer.offsetY
+      )
     })
   }
 

@@ -6,9 +6,11 @@ import { transformShapes, transformShape, polishVertices, getMachineInstance } f
 import { getShape } from '../../models/shapes'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
-import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
+import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects,
+  makeGetNonEffectLayerIndex, makeGetParentLayer } from '../layers/selectors'
 import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
+import { KONVA_SCALE } from '../../common/konva'
 import { log } from '../../common/util'
 
 const cache = new LRUCache({
@@ -57,12 +59,14 @@ const makeGetLayerVertices = layerId => {
       getCachedSelector(makeGetLayer, layerId),
       getCachedSelector(makeGetLayerMachine, layerId),
       getCachedSelector(makeGetLayerFonts, layerId),
+      getCachedSelector(makeGetParentLayer, layerId)
     ],
-    (layer, machine, fonts) => {
+    (layer, machine, fonts, parentLayer) => {
       const state = {
         shape: layer,
         machine: machine,
-        fonts: fonts
+        fonts: fonts,
+        parent: parentLayer
       }
 
       log('makeGetLayerVertices', layerId)
@@ -83,7 +87,7 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        if (!state.shape.dragging && state.shape.effect) {
+        if (state.shape.effect && !(state.shape.dragging || state.parent.dragging)) {
           return []
         } else {
           return metashape.getVertices(state)
@@ -99,11 +103,12 @@ const makeGetTransformedVertices = layerId => {
     [
       getCachedSelector(makeGetLayerVertices, layerId),
       getCachedSelector(makeGetLayer, layerId),
-      getCachedSelector(makeGetEffects, layerId)
+      getCachedSelector(makeGetEffects, layerId),
+      getCachedSelector(makeGetParentLayer, layerId)
     ],
-    (vertices, layer, effects, fonts) => {
+    (vertices, layer, effects, parentLayer) => {
       log('makeGetTransformedVertices', layerId)
-      return transformShapes(vertices, layer, effects)
+      return transformShapes(vertices, layer, effects, parentLayer)
     }
   )
 }
@@ -137,7 +142,7 @@ export const makeGetConnectorVertices = (startId, endId) => {
 
 // transform a given list of vertices as needed to be displayed in a preview layer
 const previewTransform = (layer, vertices) => {
-  const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+  const konvaScale = layer.autosize ? KONVA_SCALE : 1 // our transformer is 5 times bigger than the actual starting shape
   const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
   const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
 
@@ -317,7 +322,7 @@ export const makeGetPreviewTrackVertices = layerId => {
     (layer) => {
       log('makeGetPreviewTrackVertices', layerId)
       const numLoops = layer.numLoops
-      const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+      const konvaScale = layer.autosize ? 2 : 1 // our transformer is 5 times bigger than the actual starting shape
       const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
       const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
       let trackVertices = []

@@ -139,7 +139,7 @@ function reportTiming(time) {
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
-export const transformShapes = (vertices, layer, effects) => {
+export const transformShapes = (vertices, layer, effects, parentLayer) => {
   const startTime = performance.now()
   const numLoops = layer.repeatEnabled ? layer.numLoops : 1
   const numTrackLoops = layer.repeatEnabled ? layer.trackNumLoops : 1
@@ -176,6 +176,12 @@ export const transformShapes = (vertices, layer, effects) => {
     outputVertices = arrayRotate(outputVertices, start)
   }
 
+  if (effects && effects.length > 0) {
+    effects.forEach(effect => {
+      outputVertices = getShape(effect).applyEffect(effect, layer, outputVertices, parentLayer)
+    })
+  }
+
   if (layer.drawPortionPct !== undefined) {
     const drawPortionPct = Math.round((parseInt(layer.drawPortionPct) || 100)/100.0 * outputVertices.length)
     outputVertices = outputVertices.slice(0, drawPortionPct)
@@ -188,12 +194,6 @@ export const transformShapes = (vertices, layer, effects) => {
   if (layer.backtrackPct) {
     const backtrack = Math.round(vertices.length * layer.backtrackPct / 100.0)
     outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
-  }
-
-  if (effects && effects.length > 0) {
-    effects.forEach(effect => {
-      outputVertices = getShape(effect).applyEffect(effect, layer, outputVertices)
-    })
   }
 
   const endTime = performance.now()
