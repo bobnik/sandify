@@ -3,6 +3,13 @@ import { createSelector } from 'reselect'
 import { memoizeArrayProducingFn } from '../../common/selectors'
 import { log } from '../../common/util'
 
+function getAllLayerIds(layerIds, layersById) {
+  return layerIds.map(layerId => {
+    const layer = layersById[layerId]
+    return [layer.id, (layer.effectIds || [])].flat()
+  }).flat()
+}
+
 const getCurrentLayerId = createSelector(
   getLayers,
   (layers) => layers.current
@@ -24,13 +31,6 @@ export const getVisibleLayerIds = createSelector(
     return layerIds.filter(id => layers[id].visible)
   }
 )
-
- export const getVisibleNonEffectIds = createSelector(
-   [ getVisibleLayerIds, getLayersById ],
-   (layerIds, layers) => {
-     return layerIds.filter(id => !layers[id].effect)
-   }
- )
 
 export const getCurrentLayer = createSelector(
   [ getLayersById, getCurrentLayerId ],
@@ -65,10 +65,12 @@ export const getNumLayers = createSelector(
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const getKonvaLayerIds = createSelector(
-  [ getCurrentLayer, getVisibleLayerIds ],
-  (currentLayer, visibleLayerIds) => {
+  [ getCurrentLayer, getVisibleLayerIds, getLayersById ],
+  (currentLayer, visibleLayerIds, layersById) => {
       log("getKonvaLayerIds")
-      const kIds = visibleLayerIds.filter(id => id !== currentLayer.id)
+      const allLayerIds = getAllLayerIds(visibleLayerIds, layersById)
+      const kIds = allLayerIds.filter(id => id !== currentLayer.id)
+
       if (currentLayer.visible) {
         kIds.push(currentLayer.id)
       }
@@ -85,7 +87,7 @@ export const isDragging = createSelector(
 )
 
 export const getNumVisibleLayers = createDeepEqualSelector(
-  getVisibleNonEffectIds,
+  getVisibleLayerIds,
   (layers) => {
     return layers.length
   }
@@ -107,16 +109,7 @@ export const makeGetRootLayer = layerId => {
     ],
     (layers) => {
       const layer = layers[layerId]
-      return (layer && layer.effect) ? layers[layer.parentId] : null
-    }
-  )
-}
-
-export const makeGetNonEffectLayerIndex = layerId => {
-  return createDeepEqualSelector(
-    getVisibleNonEffectIds,
-    (visibleLayerIds) => {
-      return visibleLayerIds.findIndex(id => id === layerId)
+      return (layer && layer.effect) ? layers[layer.parentId] : layer
     }
   )
 }

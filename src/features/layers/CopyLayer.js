@@ -8,11 +8,12 @@ import { getCurrentLayer } from '../layers/selectors'
 
 const mapStateToProps = (state, ownProps) => {
   const layers = getLayers(state)
+  const current = getCurrentLayer(state)
 
   return {
-    copyLayerName: layers.copyLayerName,
+    copyLayerName: layers.copyLayerName || current.name,
     showModal: ownProps.showModal,
-    currentLayer: getCurrentLayer(state)
+    currentLayer: current
   }
 }
 

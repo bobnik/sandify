@@ -75,7 +75,7 @@ const loadDefaultLayer = () => {
   store.dispatch(setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id))
 }
 
-// set to true when running locally if you want to preserve your shape
+// set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
 const usePersistedState = false
 const persistState = false

@@ -5,7 +5,7 @@ import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
 import { MdLibraryAdd, MdOutlineFileUpload } from 'react-icons/md'
 
 import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
-import { setCurrentLayer, addLayer, removeLayer, moveLayer, moveEffect, removeEffect, toggleVisible, toggleOpen } from '../layers/layersSlice'
+import { setCurrentLayer, addLayer, removeLayer, moveLayer, moveEffect, removeEffect, toggleVisible, toggleOpen, toggleLocked } from '../layers/layersSlice'
 import { registeredShapes, getShape } from '../../models/shapes'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
@@ -61,9 +61,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onToggleLayerOpen: (id) => {
       dispatch(toggleOpen({ id: id }))
     },
-    onToggleLayerVisible: (event) => {
-      const id = event.target.closest('.list-group-item').id
-      dispatch(toggleVisible({id: id}))
+    onToggleLayerVisible: (id) => {
+      dispatch(toggleVisible({ id: id }))
+    },
+    onToggleLayerLocked: (id) => {
+      dispatch(toggleLocked({ id: id }))
     }
   }
 }
@@ -173,6 +175,22 @@ class Playlist extends Component {
               <MdOutlineFileUpload />
             </Button>
             <div className="ml-auto">
+              {canRemove && !currentLayer.effect && <Button
+                className="layer-button"
+                variant="link"
+                data-tip="Delete layer"
+                onClick={onLayerRemoved.bind(this, currentLayer.id)}
+              >
+                <FaTrash />
+              </Button>}
+              {currentLayer.effect && <Button
+                className="layer-button"
+                variant="link"
+                data-tip="Delete effect"
+                onClick={onEffectRemoved.bind(this, currentLayer.id)}
+              >
+                <FaTrash />
+              </Button>}
               <Button
                 className="layer-button"
                 variant="link"
@@ -181,22 +199,6 @@ class Playlist extends Component {
               >
                 <FaCopy />
               </Button>
-              {canRemove && !currentLayer.effect && <Button
-                className="mr-2 layer-button"
-                variant="link"
-                data-tip="Delete layer"
-                onClick={onLayerRemoved.bind(this, currentLayer.id)}
-              >
-                <FaTrash />
-              </Button>}
-              {currentLayer.effect && <Button
-                className="mr-2 layer-button"
-                variant="link"
-                data-tip="Delete effect"
-                onClick={onEffectRemoved.bind(this, currentLayer.id)}
-              >
-                <FaTrash />
-              </Button>}
             </div>
           </div>
         </div>

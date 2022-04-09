@@ -62,14 +62,6 @@ const PreviewLayer = (ownProps) => {
   const startingWidth = layer.startingWidth
   const startingHeight = layer.startingHeight
 
-  const rootOffsetX = rootLayer ? rootLayer.offsetX : 0
-  const rootOffsetY = rootLayer ? -rootLayer.offsetY : 0
-  const offsetX = layer.offsetX + rootOffsetX
-  const offsetY = -layer.offsetY + rootOffsetY
-
-  const rootRotation = rootLayer ? rootLayer.rotation : 0
-  const rotation = (layer.rotation || 0) + rootRotation
-
   const selectedColor = 'yellow'
   const unselectedColor = 'rgba(195, 214, 230, 0.65)'
   const backgroundSelectedColor = '#6E6E00'
@@ -100,7 +92,7 @@ const PreviewLayer = (ownProps) => {
     context.beginPath()
     for (let i=1; i<vertices.length; i++) {
       if (isSliding) {
-        let absoluteI = i + offsets[layer.id].start
+        let absoluteI = i + offsets[rootLayer.id].start
         let pathColor = absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
         currentColor = colors[absoluteI] || pathColor
@@ -207,14 +199,14 @@ const PreviewLayer = (ownProps) => {
         height={konvaSizeY}
         offsetY={konvaSizeY/2}
         offsetX={konvaSizeX/2}
-        x={offsetX}
-        y={offsetY}
+        x={layer.offsetX}
+        y={-layer.offsetY}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         {...props}
         strokeWidth={1}
-        rotation={rotation}
+        rotation={layer.rotation}
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {
@@ -223,8 +215,8 @@ const PreviewLayer = (ownProps) => {
         onDragEnd={e => {
           onChange({
             dragging: false,
-            offsetX: roundP(e.target.x(), 0) - rootOffsetX,
-            offsetY: roundP(-e.target.y(), 0) + rootOffsetY
+            offsetX: roundP(e.target.x(), 0),
+            offsetY: roundP(-e.target.y(), 0)
           })
         }}
         onTransformStart={e => {
@@ -232,6 +224,7 @@ const PreviewLayer = (ownProps) => {
         }}
         onTransformEnd={e => {
           const node = shapeRef.current
+          const rotation = node.rotation()
           const scaleX = node.scaleX()
           const scaleY = node.scaleY()
 
@@ -243,7 +236,7 @@ const PreviewLayer = (ownProps) => {
             dragging: false,
             startingWidth: roundP(Math.max(5, layer.startingWidth * scaleX), 0),
             startingHeight: roundP(Math.max(5, layer.startingHeight * scaleY), 0),
-            rotation: roundP(node.rotation(), 0)
+            rotation: roundP(rotation, 0)
           })
         }}
       />}

@@ -5,7 +5,7 @@ import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
 import { getMachine, getLayers, getPreview } from '../store/selectors'
-import { getCurrentLayer, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
+import { getCurrentLayer, getKonvaLayerIds, getVisibleLayerIds, isDragging } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import { relativeScale, stageBounds } from '../../common/konva'
 import PreviewLayer from './PreviewLayer'
@@ -20,7 +20,7 @@ const mapStateToProps = (state, ownProps) => {
     layers: layers,
     currentLayer: getCurrentLayer(state),
     konvaIds: getKonvaLayerIds(state),
-    layerIds: getVisibleNonEffectIds(state),
+    layerIds: getVisibleLayerIds(state),
     dragging: isDragging(state),
     machine: machine,
     canvasWidth: preview.canvasWidth,
@@ -113,7 +113,7 @@ class PreviewWindow extends Component {
                     [
                       nextId && <PreviewConnector startId={id} endId={nextId} key={'c-' + i} />,
                       <PreviewLayer id={id} key={i} index={i} />
-                    ].filter(e => e !== null)
+                    ].filter(e => e)
                   )
                 }).flat()}
               </Layer>

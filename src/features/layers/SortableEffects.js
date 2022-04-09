@@ -22,10 +22,10 @@ const SortableEffect = SortableElement((
         className="layer-button"
         variant="link"
         data-id={id}
-        onClick={onToggleLayerVisible}
+        onClick={onToggleLayerVisible.bind(this, id)}
       >
-        {visible && <FaEye />}
-        {!visible && <FaEyeSlash />}
+        {visible && <FaEye size="0.8em" />}
+        {!visible && <FaEyeSlash size="0.8em" />}
       </Button>
       <div className="layer-effect-spacer" />
       <div className="no-select">

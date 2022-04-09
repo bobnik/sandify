@@ -13,13 +13,15 @@ const newEffectType = localStorage.getItem('currentEffect') || 'mask'
 const newEffectName = getShape({type: newEffectType}).name.toLowerCase()
 
 function createLayer(state, attrs) {
+  const restore = attrs.restore
+  delete attrs.restore
+
   const layer = {
     ...attrs,
-    id: (attrs.restore && attrs.id) || uniqueId('layer-'),
-    name: attrs.name || state.newLayerName
+    id: (restore && attrs.id) || uniqueId('layer-'),
+    name: attrs.name || state.newLayerName,
   }
 
-  delete layer.restore
   state.byId[layer.id] = layer
   return layer
 }
@@ -37,6 +39,7 @@ function deleteEffect(state, deleteId) {
 
   const idx = parent.effectIds.findIndex(id => id === deleteId)
   parent.effectIds.splice(idx, 1)
+  if (parent.effectIds.length === 0) parent.locked = false
 
   delete state.byId[deleteId]
   handleAfterDelete(state, deleteId, idx)
@@ -249,6 +252,10 @@ const layersSlice = createSlice({
       const layer = action.payload
       state.byId[layer.id].visible = !state.byId[layer.id].visible
     },
+    toggleLocked(state, action) {
+      const layer = action.payload
+      state.byId[layer.id].locked = !state.byId[layer.id].locked
+    },
   }
 })
 
@@ -274,7 +281,8 @@ export const {
   toggleTrack,
   toggleTrackGrow,
   toggleVisible,
-  toggleOpen
+  toggleOpen,
+  toggleLocked
 } = layersSlice.actions
 
 export default layersSlice.reducer

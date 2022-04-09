@@ -8,10 +8,10 @@
 }
 
 .layer-effect-spacer {
-  padding-left: 1.1rem;
-  margin-left: 2.4rem;
+  padding-left: 2.5rem;
+  margin-left: 3rem;
   align-self: stretch;
-  border-left: 1px solid rgba(0,0,0,.125);
+  border-left: 1px solid rgba(0, 0, 0, 0.125);
 
   .layer-active & {
     border-left: 1px solid rgba(255, 255, 255, 0.6);
@@ -19,7 +19,12 @@
 }
 
 .layer-left {
-  width: 2.5rem;
+  width: 5.6rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.125);
+
+  .layer-active & {
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+  }
 }
 
 .cursor-move {

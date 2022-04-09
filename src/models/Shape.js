@@ -29,6 +29,7 @@ export default class Shape {
       offsetX: 0.0,
       offsetY: 0.0,
       open: true,
+      locked: false,
       rotation: 0,
       numLoops: 10,
       transformMethod: 'smear',

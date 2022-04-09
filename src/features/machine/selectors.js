@@ -6,8 +6,7 @@ import { transformShapes, transformShape, polishVertices, getMachineInstance } f
 import { getShape } from '../../models/shapes'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
-import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects,
-  makeGetNonEffectLayerIndex, makeGetParentLayer } from '../layers/selectors'
+import { makeGetLayer, getNumVisibleLayers, getVisibleLayerIds, makeGetEffects, makeGetLayerIndex, makeGetParentLayer } from '../layers/selectors'
 import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { KONVA_SCALE } from '../../common/konva'
@@ -87,7 +86,10 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        if (state.shape.effect && !(state.shape.dragging || state.parent.dragging)) {
+        if (state.shape.effect && (
+          state.parent.locked ||
+          !(state.shape.dragging || state.parent.dragging)
+        )) {
           return []
         } else {
           return metashape.getVertices(state)
@@ -160,7 +162,7 @@ const makeGetComputedVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetTransformedVertices, layerId),
-      getCachedSelector(makeGetNonEffectLayerIndex, layerId),
+      getCachedSelector(makeGetLayerIndex, layerId),
       getNumVisibleLayers,
       getMachine
     ],
@@ -192,7 +194,7 @@ export const makeGetPreviewVertices = layerId => {
 
 // returns a flattened array of all visible computed vertices and connectors (across layers)
 export const getAllComputedVertices = createSelector(
-  [getState, getVisibleNonEffectIds],
+  [getState, getVisibleLayerIds],
   (state, visibleLayerIds) => {
     log("getAllComputedVertices")
     return visibleLayerIds.map((id, idx) => {
@@ -206,8 +208,8 @@ export const getAllComputedVertices = createSelector(
 
 // returns an array of vertices connecting a given layer to the next (if it exists)
 export const getConnectingVertices = (state, layerId) => {
-  const visibleLayerIds = getVisibleNonEffectIds(state)
-  const idx = getCachedSelector(makeGetNonEffectLayerIndex, layerId)(state)
+  const visibleLayerIds = getVisibleLayerIds(state)
+  const idx = getCachedSelector(makeGetLayerIndex, layerId)(state)
 
   return idx < visibleLayerIds.length - 1 ?
     getCachedSelector(makeGetConnectorVertices, layerId, visibleLayerIds[idx + 1])(state) :
@@ -216,7 +218,7 @@ export const getConnectingVertices = (state, layerId) => {
 
 // returns the starting offset for each layer, given previous layers
 export const getVertexOffsets = createSelector(
-  [getState, getVisibleNonEffectIds],
+  [getState, getVisibleLayerIds],
   (state, visibleLayerIds) => {
     log('getVertexOffsets')
     let offsets = {}

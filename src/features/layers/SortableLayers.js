@@ -1,6 +1,6 @@
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { Button, ListGroup } from 'react-bootstrap'
-import { FaEye, FaEyeSlash, FaChevronRight, FaChevronDown } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaChevronRight, FaChevronDown, FaLock, FaUnlock } from 'react-icons/fa'
 
 import SortableEffects from './SortableEffects'
 
@@ -14,12 +14,14 @@ const SortableLayer = SortableElement((
     onEffectMoved,
     onSortStarted,
     onToggleLayerOpen,
-    onToggleLayerVisible
+    onToggleLayerVisible,
+    onToggleLayerLocked
   }) => {
-    const { name, id, visible, open } = layer
+    const { name, id, visible, open, locked } = layer
     const activeClass = active ? 'active' : ''
     const dragClass = numLayers > 1 ? 'cursor-move' : ''
     const visibleClass = visible ? '' : 'layer-hidden'
+    const hasEffects = layer.effects && layer.effects.length > 0
 
     return <ListGroup.Item
       className={[activeClass, dragClass,  visibleClass, 'layer p-0'].join(' ')}
@@ -30,33 +32,37 @@ const SortableLayer = SortableElement((
         className={[`layer-${activeClass}`, 'd-flex align-items-center'].join(' ')}
         onClick={onLayerSelected}
       >
-        <Button
-          className="layer-button"
-          variant="link"
-          data-id={id}
-          onClick={onToggleLayerVisible}
-        >
-          {visible && <FaEye />}
-          {!visible && <FaEyeSlash />}
-        </Button>
         <div className="layer-left">
-          {!open && <Button
-            className={`layer-button px-2 ${!layer.effects && 'invisible'}`}
+          <Button
+            className="layer-button"
             variant="link"
             data-id={id}
-            onClick={onToggleLayerOpen.bind(this, id)}
-            >
-            <FaChevronRight />
-          </Button>}
-          {open && <Button
-            className={`layer-button px-2 ${!layer.effects && 'invisible'}`}
-            variant="link"
-            data-id={id}
-            onClick={onToggleLayerOpen.bind(this, id)}
+            onClick={onToggleLayerVisible.bind(this, id)}
           >
-            <FaChevronDown />
+            {visible && <FaEye size="0.8em" />}
+            {!visible && <FaEyeSlash size="0.8em" />}
+          </Button>
+          {hasEffects && <Button
+            className="layer-button px-1"
+            variant="link"
+            data-id={id}
+            onClick={onToggleLayerLocked.bind(this, id)}
+            >
+            {locked && <FaLock size="0.8em" />}
+            {!locked && <FaUnlock size="0.8em" />}
           </Button>}
         </div>
+
+        <Button
+          className={`layer-button px-2 ${hasEffects ? '' : 'invisible'}`}
+          variant="link"
+          data-id={id}
+          onClick={onToggleLayerOpen.bind(this, id)}
+          >
+          {!open && <FaChevronRight size="0.8em" />}
+          {open && <FaChevronDown size="0.8em" />}
+        </Button>
+
         <div className="no-select">
            {name}
         </div>
