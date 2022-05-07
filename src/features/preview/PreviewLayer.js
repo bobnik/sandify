@@ -130,7 +130,7 @@ const PreviewLayer = (ownProps) => {
   // draws the line representing the track the path follows
   function drawTrackVertices(context) {
     context.beginPath()
-    context.lineWidth = 4.0
+    context.lineWidth = 2.0
     context.strokeStyle = 'green'
     helper.moveTo(context, trackVertices[0])
     for (let i=0; i<trackVertices.length; i++) {
@@ -234,8 +234,8 @@ const PreviewLayer = (ownProps) => {
 
           onChange({
             dragging: false,
-            startingWidth: roundP(Math.max(5, layer.startingWidth * scaleX), 0),
-            startingHeight: roundP(Math.max(5, layer.startingHeight * scaleY), 0),
+            startingWidth: roundP(Math.max(1, layer.startingWidth * scaleX), 0),
+            startingHeight: roundP(Math.max(1, layer.startingHeight * scaleY), 0),
             rotation: roundP(rotation, 0)
           })
         }}
@@ -244,7 +244,7 @@ const PreviewLayer = (ownProps) => {
         <Transformer
           ref={trRef}
           centeredScaling={true}
-          resizeEnabled={!layer.trackEnabled}
+          resizeEnabled={true}
           rotateEnabled={layer.canRotate}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={!layer.canChangeHeight ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : null }

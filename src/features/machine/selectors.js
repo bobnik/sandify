@@ -6,7 +6,8 @@ import { transformShapes, transformShape, polishVertices, getMachineInstance } f
 import { getShape } from '../../models/shapes'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
-import { makeGetLayer, getNumVisibleLayers, getVisibleLayerIds, makeGetEffects, makeGetLayerIndex, makeGetParentLayer } from '../layers/selectors'
+import { makeGetLayer, getNumVisibleLayers, getVisibleLayerIds, makeGetEffects, makeGetLayerIndex,
+  makeGetParentLayer, getCurrentLayer } from '../layers/selectors'
 import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { KONVA_SCALE } from '../../common/konva'
@@ -320,24 +321,29 @@ export const getSliderColors = createSelector(
 // re-added by Konva transformer.
 export const makeGetPreviewTrackVertices = layerId => {
   return createSelector(
-    getCachedSelector(makeGetLayer, layerId),
-    (layer) => {
+    [
+      getCachedSelector(makeGetLayer, layerId),
+      getCurrentLayer
+    ],
+    (layer, currentLayer) => {
       log('makeGetPreviewTrackVertices', layerId)
-      const numLoops = layer.numLoops
-      const konvaScale = layer.autosize ? 2 : 1 // our transformer is 5 times bigger than the actual starting shape
-      const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
-      const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
-      let trackVertices = []
+      if (layer.id == currentLayer.id) {
+        const numLoops = layer.numLoops
+        const konvaScale = layer.autosize ? 2 : 1 // our transformer is 5 times bigger than the actual starting shape
+        const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
+        const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
+        let trackVertices = []
 
-      for (var i=0; i<numLoops; i++) {
-        if (layer.trackEnabled) {
-          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+        for (var i=0; i<numLoops; i++) {
+          if (layer.trackEnabled) {
+            trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+          }
         }
-      }
 
-      return trackVertices.map(vertex => {
-        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDeltaX, -konvaDeltaY)
-      })
+        return trackVertices.map(vertex => {
+          return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDeltaX, -konvaDeltaY)
+        })
+      }
     }
   )
 }

@@ -131,6 +131,7 @@ const layersSlice = createSlice({
       const index = state.allIds.findIndex(id => id === state.current) + 1
       state.allIds.splice(index, 0, layer.id)
       setCurrentId(state, layer.id)
+      state.copyLayerName = null
     },
     removeLayer(state, action) {
       const id = action.payload
