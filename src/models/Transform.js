@@ -1,6 +1,6 @@
 const transformOptions = {
   startingWidth: {
-    title: 'Initial width',
+    title: 'Width',
     min: 1,
     isVisible: (state) => { return state.canChangeSize },
     onChange: (changes, attrs) => {
@@ -11,9 +11,9 @@ const transformOptions = {
     }
   },
   startingHeight: {
-    title: 'Initial height',
+    title: 'Height',
     min: 1,
-    isVisible: (state) => { return state.canChangeSize && state.canChangeHeight },
+    isVisible: (state) => { return state.canChangeSize && state.canChangeHeight }
   },
   offsetX: {
     title: 'X offset',
@@ -59,7 +59,7 @@ const transformOptions = {
     min: 1
   },
   transformMethod: {
-    title: 'When transforming shape',
+    title: 'When transforming',
     type: 'dropdown',
     choices: ['smear', 'intact'],
   },

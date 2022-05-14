@@ -10,6 +10,7 @@ import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import FancyText from '../models/FancyText'
+import LayerTransform from '../models/LayerTransform'
 import LSystem from '../models/lsystem/LSystem'
 import Mask from '../models/Mask'
 import Noise from '../models/Noise'
@@ -52,6 +53,7 @@ export const registeredShapes = {
   fisheye: new Fisheye(),
   mask: new Mask(),
   noise: new Noise(),
+  transform: new LayerTransform(),
   warp: new Warp()
 }
 

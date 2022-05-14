@@ -36,30 +36,33 @@ const store = configureStore({
 const loadPersistedLayers = (layers) => {
   layers.allIds.forEach(id => {
     const layer = layers.byId[id]
-    const newLayer = {
-      ...layer,
-      id: uniqueId('layer-'),
-      restore: true,
-      startingWidth: layer.startingWidth || layer.startingSize,
-      startingHeight: layer.startingWidth || layer.startingSize,
-      autosize: layer.autosize || true
-    }
 
-    // for referential integrity, we have to explicitly generate ids and
-    // re-build relationships.
-    store.dispatch(addLayer(newLayer))
-    if (layer.effectIds) {
-      newLayer.effectIds = layer.effectIds.map(effectId => {
-        const effect = {
-          ...layers.byId[effectId],
-          id: uniqueId('layer-'),
-          restore: true,
-          parentId: newLayer.id
-        }
-        store.dispatch(addEffect(effect))
-        return effect.id
-      })
-      store.dispatch(updateLayer(newLayer))
+    if (layer) {
+      const newLayer = {
+        ...layer,
+        id: uniqueId('layer-'),
+        restore: true,
+        startingWidth: layer.startingWidth || layer.startingSize,
+        startingHeight: layer.startingWidth || layer.startingSize,
+        autosize: layer.autosize || true
+      }
+
+      // for referential integrity, we have to explicitly generate ids and
+      // re-build relationships.
+      store.dispatch(addLayer(newLayer))
+      if (layer.effectIds) {
+        newLayer.effectIds = layer.effectIds.map(effectId => {
+          const effect = {
+            ...layers.byId[effectId],
+            id: uniqueId('layer-'),
+            restore: true,
+            parentId: newLayer.id
+          }
+          store.dispatch(addEffect(effect))
+          return effect.id
+        })
+        store.dispatch(updateLayer(newLayer))
+      }
     }
   })
 }
@@ -77,8 +80,8 @@ const loadDefaultLayer = () => {
 
 // set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const usePersistedState = false
-const persistState = false
+const usePersistedState = true
+const persistState = true
 
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change

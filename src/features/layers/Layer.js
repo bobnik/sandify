@@ -73,7 +73,7 @@ class Layer extends Component {
       shapeSelectRender =
         <Row className="align-items-center">
           <Col sm={5}>
-            Shape
+            Type
           </Col>
 
           <Col sm={7}>

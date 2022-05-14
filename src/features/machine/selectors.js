@@ -145,7 +145,7 @@ export const makeGetConnectorVertices = (startId, endId) => {
 
 // transform a given list of vertices as needed to be displayed in a preview layer
 const previewTransform = (layer, vertices) => {
-  const konvaScale = layer.autosize ? KONVA_SCALE : 1 // our transformer is 5 times bigger than the actual starting shape
+  const konvaScale = layer.autosize ? KONVA_SCALE : 1 // our transformer is bigger than the actual starting shape
   const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
   const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
 

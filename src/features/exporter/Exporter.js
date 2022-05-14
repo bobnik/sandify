@@ -82,20 +82,20 @@ export default class Exporter {
     this.line(key + ': ' + value, add)
   }
 
-  optionLine(metamodel, instance, option, add=true) {
+  optionLine(options, instance, option, add=true) {
     const val = typeof instance[option] == 'string' ?
       instance[option].replace(/[\n\r]/g, ' ') :
       instance[option]
-    this.line(metamodel.getOptions()[option].title + ': ' + val, add)
+    this.line(options[option].title + ': ' + val, add)
   }
 
-  optionLines(metamodel, instance, options, add=true) {
-    options.forEach(option => {
-      const metaOption = metamodel.getOptions()[option]
+  optionLines(options, instance, includedOptions, add=true) {
+    includedOptions.forEach(option => {
+      const metaOption = options[option]
       const visible = metaOption.isVisible === undefined ? true : metaOption.isVisible(instance)
 
       if (visible) {
-        this.optionLine(metamodel, instance, option, add)
+        this.optionLine(options, instance, option, add)
       }
     })
   }

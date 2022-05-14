@@ -9,6 +9,7 @@ import {
   ToggleButton,
   ToggleButtonGroup
 } from 'react-bootstrap'
+import { getShape } from '../../models/shapes'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import ToggleButtonOption from '../../components/ToggleButtonOption'
@@ -21,11 +22,16 @@ import TrackTransform from './TrackTransform'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
+  const shape = getShape(layer)
+  const options = {
+    ...(new Transform()).getOptions(),
+    ...shape.getTransformOptions()
+  }
 
   return {
     layer: layer,
     active: layer.repeatEnabled,
-    options: (new Transform()).getOptions()
+    options: options
   }
 }
 
@@ -93,18 +99,10 @@ class Transforms extends Component {
           index={0}
           model={this.props.layer} />
 
-         <CheckboxOption
-          onChange={this.props.onChange}
-          options={this.props.options}
-          key="reverse"
-          optionKey="reverse"
-          index={0}
-          model={this.props.layer} />
-
         {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onRepeat}>
-              <h3>Loop and transform</h3>
+              <h3>Repeat</h3>
               Draws the shape multiple times, transforming it each time.
             </Accordion.Toggle>
 
@@ -121,7 +119,7 @@ class Transforms extends Component {
                   <Row className="align-items-center pb-2">
                     <Col sm={5}>
                       <Form.Label htmlFor="transformMethod">
-                        When transforming shape
+                        When transforming...
                       </Form.Label>
                     </Col>
 
@@ -146,7 +144,15 @@ class Transforms extends Component {
 
       {!this.props.layer.effect && <Card className="mt-3">
         <Card.Body>
-          <h3 className="mb-3">Fine tuning (advanced)</h3>
+          <h3 className="mb-3">Fine tuning</h3>
+          <CheckboxOption
+           onChange={this.props.onChange}
+           options={this.props.options}
+           key="reverse"
+           optionKey="reverse"
+           index={0}
+           model={this.props.layer} />
+
           <ToggleButtonOption
             onChange={this.props.onChange}
             options={this.props.options}

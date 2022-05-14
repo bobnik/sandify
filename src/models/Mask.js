@@ -85,16 +85,19 @@ export default class Mask extends Effect {
   }
 
   applyEffect(effect, layer, vertices, options = {}) {
+    const dragging = effect.dragging || (!layer.locked && layer.dragging)
+
     vertices = vertices.map(vertex => {
       return rotate(
         offset(
           vertex,
-          -effect.offsetX - layer.offsetX,
-          -effect.offsetY - layer.offsetY
-        ), effect.rotation + layer.rotation)
+          -effect.offsetX,
+          -effect.offsetY
+        ), effect.rotation
+      )
     })
 
-    if (!effect.dragging) {
+    if (!dragging) {
       const machineClass = effect.maskMachine === 'circle' ?
         (effect.maskInvert ? PolarInvertedMachine : PolarMachine) :
         (effect.maskInvert ? RectInvertedMachine : RectMachine)
@@ -108,9 +111,9 @@ export default class Mask extends Effect {
 
     return vertices.map(vertex => {
       return offset(
-        rotate(vertex, -effect.rotation - layer.rotation),
-        effect.offsetX + layer.offsetX,
-        effect.offsetY + layer.offsetY
+        rotate(vertex, -effect.rotation),
+        effect.offsetX,
+        effect.offsetY
       )
     })
   }

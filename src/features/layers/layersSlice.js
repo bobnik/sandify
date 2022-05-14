@@ -7,6 +7,7 @@ const protectedAttrs = [
   'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
   'usesMachine', 'shouldCache', 'canChangeHeight', 'canRotate', 'usesFont'
 ]
+
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
 const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
 const newEffectType = localStorage.getItem('currentEffect') || 'mask'
@@ -220,7 +221,8 @@ const layersSlice = createSlice({
     },
     updateLayer(state, action) {
       const layer = action.payload
-      state.byId[layer.id] = {...state.byId[layer.id], ...layer}
+      const currLayer = state.byId[layer.id]
+      state.byId[layer.id] = {...currLayer, ...layer}
     },
     updateLayers(state, action) {
       Object.assign(state, action.payload)

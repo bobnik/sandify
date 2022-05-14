@@ -22,21 +22,26 @@ const PreviewLayer = (ownProps) => {
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
     const layers = getLayers(state)
-    const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayer(state)
+    const currentLayer = getCurrentLayer(state)
+    const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || currentLayer
     const rootLayer = getCachedSelector(makeGetRootLayer, ownProps.id)(state)
     const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
+//    const isTransform = layer.id == currentLayer.id && layer.type === 'transform'
+//    const renderedLayer =  isTransform ? rootLayer : layer
+    const renderedLayer = layer
     const preview = getPreview(state)
     const machine = getMachine(state)
 
     return {
       layer: layer,
       rootLayer: rootLayer,
+      currentLayer: currentLayer,
+      renderedLayer: renderedLayer,
       start: index === 0,
       end: index === numLayers - 1,
-      currentLayer: getCurrentLayer(state),
       trackVertices: getCachedSelector(makeGetPreviewTrackVertices, layer.id)(state),
-      vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
+      vertices: getCachedSelector(makeGetPreviewVertices, renderedLayer.id)(state),
       allVertices: getAllComputedVertices(state),
       selected: layers.selected,
       sliderValue: preview.sliderValue,
@@ -48,6 +53,7 @@ const PreviewLayer = (ownProps) => {
       markCoordinates: false, // debug feature: set to true to see coordinates while drawing
       use_rect: machine.rectangular,
       machine: machine,
+//      isTransform: isTransform,
       canvasWidth: preview.canvasWidth,
       canvasHeight: preview.canvasHeight
     }
@@ -56,12 +62,15 @@ const PreviewLayer = (ownProps) => {
   const props = useSelector(mapStateToProps, shallowEqual)
   const {
     machine, layer, selected, sliderValue, vertices, offsets, colors, start, end, trackVertices,
-    bounds, currentLayer, rootLayer
+    bounds, currentLayer, rootLayer, renderedLayer//, isTransform
   } = props
   const dispatch = useDispatch()
   const startingWidth = layer.startingWidth
   const startingHeight = layer.startingHeight
-
+  const isTransforming = currentLayer.visible &&
+    currentLayer.parentId == layer.id &&
+    currentLayer.type === 'transform' &&
+    currentLayer.dragging
   const selectedColor = 'yellow'
   const unselectedColor = 'rgba(195, 214, 230, 0.65)'
   const backgroundSelectedColor = '#6E6E00'
@@ -190,9 +199,15 @@ const PreviewLayer = (ownProps) => {
     }
   }, [isSelected, layer, currentLayer.canMove, shapeRef, trRef])
 
+  console.log("layer = " + layer.id)
+  console.log("konvaSizeX = " + konvaSizeX)
+  console.log("konvaSizeY = " + konvaSizeY)
+  console.log("offsetX = " + layer.offsetX)
+  console.log("offsetY = " + layer.offsetY)
+
   return (
     <React.Fragment>
-      {layer.visible && <Shape
+      {layer.visible && !isTransforming && <Shape
         clipFunc={layerClipFunc(machine)}
         draggable={currentLayer.canMove && layer.id === currentLayer.id}
         width={konvaSizeX}
@@ -206,7 +221,7 @@ const PreviewLayer = (ownProps) => {
         ref={shapeRef}
         {...props}
         strokeWidth={1}
-        rotation={layer.rotation}
+        rotation={renderedLayer.rotation}
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {

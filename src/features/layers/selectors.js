@@ -141,7 +141,12 @@ export const makeGetEffects = layerId => {
         if (layer.effectIds) {
           layer.effectIds.forEach(effectId => {
             const effect = layers[effectId]
-            if (effect && effect.visible) effects.push(effect)
+            if (effect && effect.visible) effects.push({...effect})
+          })
+
+          const draggedIndex = layer.dragging ? 0 : effects.findIndex(effect => effect.dragging)
+          effects.forEach((effect, index) => {
+            effect.siblingDragging = draggedIndex != -1 && draggedIndex < effect
           })
         }
 

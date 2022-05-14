@@ -65,6 +65,12 @@ export default class Shape {
     return shapeOptions
   }
 
+  // merged with Transform#getOptions, so you can use to add or override transform
+  // options (carefully)
+  getTransformOptions() {
+    return {}
+  }
+
   getVertices(state) {
     return []
   }

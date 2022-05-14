@@ -15,6 +15,7 @@ export default class CommentExporter extends Exporter {
     const state = this.props
     const machine = new Machine()
     const transform = new Transform()
+    const machineOptions = machine.getOptions()
     let instance = state.machine
 
     this.line('Created by Sandify')
@@ -24,8 +25,8 @@ export default class CommentExporter extends Exporter {
 
     this.keyValueLine('Machine type', state.machine.rectangular ? 'Rectangular' : 'Polar')
     this.indent()
-    this.optionLines(machine, instance, ['minX', 'maxX', 'minY', 'maxY'], state.machine.rectangular)
-    this.optionLines(machine, instance,  ['maxRadius', 'polarStartPoint', 'polarEndPoint'], !state.machine.rectangular)
+    this.optionLines(instance, machineOptions, ['minX', 'maxX', 'minY', 'maxY'], state.machine.rectangular)
+    this.optionLines(instance, machineOptions, ['maxRadius', 'polarStartPoint', 'polarEndPoint'], !state.machine.rectangular)
     this.dedent()
 
     this.keyValueLine('Content type', state.app.input)
@@ -36,46 +37,47 @@ export default class CommentExporter extends Exporter {
         layers.forEach(layer => {
           const shape = getShape(layer)
           const options = shape.getOptions()
+          const transformOptions = transform.getOptions()
 
           this.line('Layer:')
           this.indent()
           this.keyValueLine('Shape', shape.name)
-          this.optionLines(shape, layer, Object.keys(options))
+          this.optionLines(options, layer, Object.keys(options))
           this.keyValueLine('Visible', layer.visible)
-          this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'offsetX', 'offsetY', 'rotation', 'reverse'])
-          this.optionLines(transform, layer, ['numLoops', 'transformMethod'], layer.repeatEnabled)
+          this.optionLines(transformOptions, layer, ['startingWidth', 'startingHeight', 'offsetX', 'offsetY', 'rotation', 'reverse'])
+          this.optionLines(transformOptions, layer, ['numLoops', 'transformMethod'], layer.repeatEnabled)
 
-          this.optionLine(transform, layer, 'growEnabled', layer.repeatEnabled)
+          this.optionLine(transformOptions, layer, 'growEnabled', layer.repeatEnabled)
           this.indent()
-          this.optionLine(transform, layer, 'growValue', layer.repeatEnabled && layer.growEnabled)
-          this.optionLine(transform, layer, 'growMethod', layer.repeatEnabled && layer.growEnabled)
+          this.optionLine(transformOptions, layer, 'growValue', layer.repeatEnabled && layer.growEnabled)
+          this.optionLine(transformOptions, layer, 'growMethod', layer.repeatEnabled && layer.growEnabled)
           this.indent()
-          this.optionLine(transform, layer, 'growMath', layer.repeatEnabled && layer.growEnabled && layer.growMethod === 'function')
-          this.dedent()
-          this.dedent()
-
-          this.optionLine(transform, layer, 'spinEnabled', layer.repeatEnabled)
-          this.indent()
-          this.optionLines(transform, layer, ['spinValue', 'spinMethod'], layer.repeatEnabled && layer.spinEnabled)
-          this.indent()
-          this.optionLine(transform, layer, 'spinMath', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'function')
-          this.optionLine(transform, layer, 'spinSwitchbacks', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'constant')
+          this.optionLine(transformOptions, layer, 'growMath', layer.repeatEnabled && layer.growEnabled && layer.growMethod === 'function')
           this.dedent()
           this.dedent()
 
-          this.optionLine(transform, layer, 'trackEnabled', layer.repeatEnabled)
+          this.optionLine(transformOptions, layer, 'spinEnabled', layer.repeatEnabled)
           this.indent()
-          this.optionLines(transform, layer, ['trackValue', 'trackLength', 'trackNumLoops'], layer.repeatEnabled && layer.trackEnabled)
-          this.optionLine(transform, layer, 'trackGrowEnabled', layer.repeatEnabled && layer.trackEnabled)
+          this.optionLines(transformOptions, layer, ['spinValue', 'spinMethod'], layer.repeatEnabled && layer.spinEnabled)
           this.indent()
-          this.optionLine(transform, layer, 'trackGrow', layer.repeatEnabled && layer.trackGrowEnabled)
+          this.optionLine(transformOptions, layer, 'spinMath', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'function')
+          this.optionLine(transformOptions, layer, 'spinSwitchbacks', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'constant')
+          this.dedent()
+          this.dedent()
+
+          this.optionLine(transformOptions, layer, 'trackEnabled', layer.repeatEnabled)
+          this.indent()
+          this.optionLines(transformOptions, layer, ['trackValue', 'trackLength', 'trackNumLoops'], layer.repeatEnabled && layer.trackEnabled)
+          this.optionLine(transformOptions, layer, 'trackGrowEnabled', layer.repeatEnabled && layer.trackEnabled)
+          this.indent()
+          this.optionLine(transformOptions, layer, 'trackGrow', layer.repeatEnabled && layer.trackGrowEnabled)
           this.dedent()
           this.dedent()
 
           if (!layer.effect) {
             this.line('Fine tuning:')
             this.indent()
-            this.optionLines(transform, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
+            this.optionLines(transformOptions, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
             this.dedent()
           }
           this.dedent()
