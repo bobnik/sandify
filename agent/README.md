@@ -44,6 +44,7 @@ Run Claude.
 docker run --rm -it \
   --env-file .env \
   -v "$PDIR/agent-sandbox":/project:rw \
+  -v "$PDIR/agent/claude_append.txt":/opt/claude/claude_append.txt:ro \
   -v claude_state:/home/agent \
   -w /project \
   claude-author:local \

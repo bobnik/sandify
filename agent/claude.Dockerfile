@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @anthropic-ai/claude-code
-COPY agent/claude_append.txt /opt/claude/claude_append.txt
 COPY agent/claude_entrypoint.sh /usr/local/bin/claude_entrypoint.sh
 RUN chmod +x /usr/local/bin/claude_entrypoint.sh
 

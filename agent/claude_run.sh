@@ -89,5 +89,6 @@ docker run --rm -it \
   -v "$WORKTREE_DIR":/project:rw \
   -v claude_state:/home/agent \
   -v "$PARENT_GIT_DIR":"$PARENT_GIT_DIR":rw \
+  -v "$ROOT_DIR/agent/claude_append.txt":/opt/claude/claude_append.txt:ro \
   -w /project \
   "$IMAGE"
