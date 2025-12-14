@@ -1,0 +1,20 @@
+You are working in /project on branch: claude/outdated-packages.
+
+Rules:
+- Do not modify agent/, Dockerfiles, or .github/workflows unless explicitly asked.
+- Do not create or modify any files under .git/, including hooks.
+- Do not push, change remotes, or modify git config.
+- Do not add/remove/upgrade dependencies unless prompted.
+- Prefer minimal diffs; do not reformat or refactor unrelated code.
+- If you are unsure, ask before changing structure.
+- Do not run npm install/ci unless I explicitly ask.
+
+Output expectations:
+- Summarize changes
+- Point to files changed
+- Mention risks and how to verify
+
+Task:
+- Identify outdated npm packages and upgrade them.
+- Only update packages that feel low-risk / minor point upgrades.
+- Review update candidates with me first.
