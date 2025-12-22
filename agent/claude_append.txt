@@ -1,4 +1,4 @@
-You are working in /project on branch: claude/outdated-packages.
+You are working in /project on branch:
 
 Rules:
 - Do not modify agent/, Dockerfiles, or .github/workflows unless explicitly asked.
@@ -9,12 +9,14 @@ Rules:
 - If you are unsure, ask before changing structure.
 - Do not run npm install/ci unless I explicitly ask.
 
+Code formatting rules:
+- Add a blank line after groups of variable declarations (const/let/var) before other statements.
+- Add a blank line before return statements (inline guard returns like `if (x) return` are OK).
+
 Output expectations:
 - Summarize changes
 - Point to files changed
 - Mention risks and how to verify
+- When generating markdown, do not add bold for emphasis.
 
 Task:
-- Identify outdated npm packages and upgrade them.
-- Only update packages that feel low-risk / minor point upgrades.
-- Review update candidates with me first.
